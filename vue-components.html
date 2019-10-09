@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>School of Net - Vue Components</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    
+    
+</head>
+<body>
+    
+    <div id="app">
+        <contar></contar>
+        <contar></contar>
+        <contar></contar>
+        <nome></nome>
+        
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+        Vue.component('contar',{
+            template:`
+            <div>
+                <button type='button' @click='conte'>Contar</button>   {{contador}}
+            </div>
+            `,
+            data(){
+                return {
+                    contador:0
+                }
+            },
+            methods: {
+                conte(){
+                    this.contador++;
+                }
+            }
+            
+        });
+        
+        Vue.component('nome',{
+            template:`
+            <h1>Allan Lúcio</h1>
+            
+            `
+        });
+        
+        new Vue({
+            el: '#app',
+            data:{
+                variavel: 0,
+                variavel2: 0,
+            }
+        });
+    </script>
+</body>
+</html>
