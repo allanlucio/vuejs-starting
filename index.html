@@ -21,7 +21,7 @@
     <div id="app" class="container">
 
         <div class="row">
-            <h3>Campeonato Brasileiro Serie A - 2018</h3>
+            <h1>Campeonato Brasileiro Serie A - 2018</h1>
         </div>
         <div class="row">
             <div class="col-md-12">
@@ -32,6 +32,7 @@
         
         <div  class="row">
                 <div class="col-md-12" v-show="visao != 'tabela'">
+                        
                         <form class='form-inline'>
                                 <input type="text" class="form-control col-md-1" v-model="novoJogo.casa.gols"> 
                                 {{novoJogo.casa.time ? novoJogo.casa.time.nome: ''}}
@@ -48,29 +49,46 @@
         </div>
         
         <div class="col-md-12" v-show="visao == 'tabela'">
+                <input type="text" class="form-control" v-model='busca'>
                 <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Nome</th>
-                                <th>Pontos</th>
-                                <th>GM</th>
-                                <th>GS</th>
-                                <th>Saldo</th>   
+                                
+                                <th v-for="(coluna, indice) in ordem.colunas">
+                                    
+                                    <a href="#" @click.prevent="ordenar(indice)">{{coluna | ucwords }}</a>
+                                    
+                                </th>
+                                
+                                 
                             </tr>
                             
                         </thead>
                         <tbody>
-                            <tr v-for='time in times'>
+                            <tr v-for='time in timesFiltrados'>
                                 <td><img class="escudo" :src="time.escudo" alt="">{{time.nome | ucwords}}</td>
                                 <td>{{time.pontos}}</td>
                                 <td>{{time.gm}}</td>
                                 <td>{{time.gs}}</td>
-                                <td>{{time | saldo}}</td>
+                                <td>{{time.saldo}}</td>
                             </tr>
                             
                             
                         </tbody>
                     </table>
+                    <h3>Times classificados para a libertadores 2019</h3>
+                    <ul>
+                        <li v-for='time in timesLibertadores'>
+                            <img class="escudo" :src="time.escudo" alt="">{{time.nome | ucwords}}
+                        </li>
+                    </ul>
+                    <h3>Times Rebaixados</h3>
+                    <ul>
+                        <li v-for='time in timesRebaixados'>
+                            <img class="escudo" :src="time.escudo" alt="">{{time.nome | ucwords}}
+                        </li>
+                    </ul>
         </div>
         
         
@@ -81,6 +99,7 @@
     </div>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
     <script>
         class Time{
             constructor(nome, escudo){
@@ -89,6 +108,7 @@
                 this.pontos = 0;
                 this.gm = 0;
                 this.gs = 0;
+                this.saldo = 0;
             }
 
             fimJogo(timeVisitante, golsMarcados, golsSofridos){
@@ -131,6 +151,7 @@
                 this.pontos += pontos;
                 this.gm += golsMarcados;
                 this.gs += golsSofridos;
+                this.saldo += this.gm - this.gs;
             }
             
         }
@@ -138,6 +159,15 @@
             el: '#app',
             data:{
                gols:'3',
+               busca:'',
+               ordem:{
+                    colunas: [
+                        'pontos','gm','gs','saldo'
+                    ],
+                    orientacao:[
+                        'desc','desc','asc','saldo'
+                    ]
+                }   ,
                times:[
                 new Time('palmeiras', 'assets/palmeiras_60x60.png'),
                 new Time('Internacional', 'assets/internacional_60x60.png'),
@@ -172,6 +202,24 @@
             },
             visao:'tabela'
             },
+            computed:{
+                timesLibertadores(){
+                    return this.times.slice(0,6);
+                },
+                timesRebaixados(){
+                    return this.times.slice(16,20);
+                },
+                timesFiltrados(){
+                    var times = _.orderBy(this.times,this.ordem.colunas,this.ordem.orientacao);
+                    var busca = this.busca.toLowerCase();
+                        
+                    return _.filter(times,function(time){
+                        
+                        return time.nome.toLowerCase().indexOf(busca) >= 0;
+                    });
+                }
+                
+            },
             methods:{
                 showAlert(){
                     alert('Fim de Jogo');
@@ -199,6 +247,10 @@
 
                     timeCasa.fimJogo(timeAdversario,golsMarcados,golsSofridos);
                     this.visao='tabela';
+                },
+                ordenar(indice){
+                    
+                    this.$set(this.ordem.orientacao,indice,this.ordem.orientacao[indice]=='desc' ? 'asc':'desc')
                 }
             },
             filters:{
