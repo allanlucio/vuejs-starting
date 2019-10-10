@@ -33,12 +33,10 @@
             <div class="col-md-12" v-show="visao != 'tabela'">
                 
                 <form class='form-inline'>
-                    <input type="text" class="form-control col-md-1" v-model="novoJogo.casa.gols"> 
-                    {{novoJogo.casa.time ? novoJogo.casa.time.nome: ''}}
-                    <img class="escudo" :src="novoJogo.casa.time ? novoJogo.casa.time.escudo: ''" alt="">
+                    <input type="text" class="form-control col-md-1" v-model="novoJogo.casa.gols">
+                    <clube :time="novoJogo.casa.time" invertido="true" v-if="novoJogo.casa.time"></clube>
                     <span>X</span>
-                    <img class="escudo" :src="novoJogo.fora.time ? novoJogo.fora.time.escudo: ''" alt="">
-                    {{novoJogo.casa.time ? novoJogo.fora.time.nome: ''}}
+                    <clube :time="novoJogo.fora.time" v-if="novoJogo.fora.time"></clube>
                     <input type="text" class="form-control col-md-1" v-model="novoJogo.fora.gols">
                 </form>
                 <button class="btn btn-primary" @click="fimJogo"> Fim de Jogo</button>
@@ -66,7 +64,7 @@
                 </thead>
                 <tbody>
                     <tr v-for='(time,indice) in timesFiltrados' :class="{'table-success': indice < 6, 'table-danger':indice > 15}" :style="{'font-size': indice<6?'17px':'15px'}">
-                        <td><clube :time='time'></clube></td>
+                        <td><clube :time='time' invertido='false'></clube></td>
                         <td>{{time.pontos}}</td>
                         <td>{{time.gm}}</td>
                         <td>{{time.gs}}</td>
@@ -76,19 +74,11 @@
                     
                 </tbody>
             </table>
-            <h3>Times classificados para a libertadores 2019</h3>
-            <ul>
-                <li v-for='time in timesLibertadores'>
-                    
-                    <clube :time='time'></clube>
-                </li>
-            </ul>
-            <h3>Times Rebaixados</h3>
-            <ul>
-                <li v-for='time in timesRebaixados'>
-                    <clube :time='time'></clube>
-                </li>
-            </ul>
+            
+            
+            <clubes-libertadores :times='timesOrdered'></clubes-libertadores>
+            <clubes-rebaixados   :times='timesOrdered'></clubes-rebaixados>
+            
         </div>
         
         

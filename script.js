@@ -9,13 +9,51 @@ Vue.component('titulo',
 
 Vue.component('clube',
 {
-    props:['time'],
+    props:['time','invertido'],
     template:`
-    <div>
-        <img class="escudo" :src="time.escudo" alt="">
-        {{time.nome | ucwords}}
+    <div style="display: flex; flex-direction:row">
+        <img :style="{order: invertido =='true'?2:1}" class="escudo" :src="time.escudo" alt="">
+        <span :style="{order: invertido =='true'?1:2}">{{time.nome | ucwords}}</span>
     </div>
     `
+});
+Vue.component('clubes-rebaixados',
+{
+    props:['times'],
+    template:`
+        <div>
+        <h3>Times Rebaixados</h3>
+        <ul>
+            <li v-for='time in timesRebaixados'>
+                <clube :time='time'></clube>
+            </li>
+        </ul>
+        </div>
+    `,
+    computed:{
+        timesRebaixados(){
+            return this.times.slice(16,20);
+        },
+    }
+});
+Vue.component('clubes-libertadores',
+{
+    props:['times'],
+    template:`
+        <div>
+        <h3>Times classificados para a libertadores 2019</h3>
+        <ul>
+            <li v-for='time in timesLibertadores'>
+                <clube :time='time'></clube>
+            </li>
+        </ul>
+        </div>
+    `,
+    computed:{
+        timesLibertadores(){
+            return this.times.slice(0,6);
+        },
+    }
 });
 
 Vue.filter('ucwords',(valor) => {
@@ -79,13 +117,17 @@ new Vue({
             return this.times.slice(16,20);
         },
         timesFiltrados(){
-            var times = _.orderBy(this.times,this.ordem.colunas,this.ordem.orientacao);
+            var times = this.timesOrdered;
             var busca = this.busca.toLowerCase();
             
             return _.filter(times,function(time){
                 
                 return time.nome.toLowerCase().indexOf(busca) >= 0;
             });
+        },
+        timesOrdered(){
+            var times = _.orderBy(this.times,this.ordem.colunas,this.ordem.orientacao);
+            return times;
         }
         
     },
