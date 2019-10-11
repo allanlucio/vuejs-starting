@@ -79,31 +79,131 @@ Vue.component('novo-jogo',{
     <span>X</span>
     <clube :time="timeFora" v-if="timeFora"></clube>
     <input type="text" class="form-control col-md-1" v-model="golsFora">
-    <button type="button" class="btn btn-primary" @click="fimJogo"> Fim de Jogo</button>
+    <button type="button" class="btn btn-primary col-md-12" @click="fimJogo"> Fim de Jogo</button>
     </form>
     
     `
 });
 
-Vue.filter('ucwords',(valor) => {
+Vue.component('tabela-clubes',{
+    props:['times'],
     
-    return valor.charAt(0).toUpperCase() + valor.slice(1);
+    data(){
+        
+        return {
+            busca:'',
+            ordem:{
+                colunas: [
+                    'pontos','gm','gs','saldo'
+                ],
+                orientacao:[
+                    'desc','desc','asc','saldo'
+                ]
+            },
+            
+        }
     
+    },
+    methods:{
+        ordenar(indice){
+            
+            this.$set(this.ordem.orientacao,indice,this.ordem.orientacao[indice]=='desc' ? 'asc':'desc')
+        },
+    },
+    computed:{
+        timesFiltrados(){
+            var times = this.timesOrdered;
+            var busca = this.busca.toLowerCase();
+            
+            return _.filter(times,function(time){
+                
+                return time.nome.toLowerCase().indexOf(busca) >= 0;
+            });
+        },
+        timesOrdered(){
+            var times = _.orderBy(this.times,this.ordem.colunas,this.ordem.orientacao);
+            return times;
+        },
+    },
+    template:`
+    <div>
+    <input type="text" class="form-control" v-model='busca'>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    
+                    <th v-for="(coluna, indice) in ordem.colunas">
+                        
+                        <a href="#" @click.prevent="ordenar(indice)">{{coluna | ucwords }}</a>
+                        
+                    </th>
+                    
+                    
+                </tr>
+                
+            </thead>
+            <tbody>
+                <tr v-for='(time,indice) in timesFiltrados' :class="{'table-success': indice < 6, 'table-danger':indice > 15}" :style="{'font-size': indice<6?'17px':'15px'}">
+                    <td><clube :time='time' invertido='false'></clube></td>
+                    <td>{{time.pontos}}</td>
+                    <td>{{time.gm}}</td>
+                    <td>{{time.gs}}</td>
+                    <td>{{time.saldo}}</td>
+                </tr>
+                
+                
+            </tbody>
+        </table>
+        <clubes-libertadores :times='timesOrdered'></clubes-libertadores>
+        <clubes-rebaixados   :times='timesOrdered'></clubes-rebaixados>
+        </div>
+    `
 });
 
-new Vue({
-    el: '#app',
-    data:{
-        gols:'3',
-        busca:'',
-        ordem:{
-            colunas: [
-                'pontos','gm','gs','saldo'
-            ],
-            orientacao:[
-                'desc','desc','asc','saldo'
-            ]
-        }   ,
+
+
+Vue.component("my-app",{
+    
+    template:`
+    <div id="app" class="container">
+        
+    <titulo></titulo>
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-primary" @click='criarNovoJogo'> Novo Jogo</button>
+        </div>
+        
+    </div>
+    
+    <div  class="row">
+        <div class="col-md-12" v-show="visao != 'tabela'">
+            
+            <novo-jogo @fim-jogo="showTabela()" :time-casa="timeCasa" :time-fora="timeFora"></novo-jogo>
+            
+        </div>
+        
+    </div>
+    <div class="row">
+    <div class="col-md-12" v-show="visao == 'tabela'">
+        <tabela-clubes :times="times"></tabela-clubes>
+        
+        
+        
+        
+    </div>
+</div>
+    
+    
+    
+    
+    
+</div>
+    `,
+    data(){
+        return {
+            
+        
         times:[
             new Time('palmeiras', 'assets/palmeiras_60x60.png'),
             new Time('Internacional', 'assets/internacional_60x60.png'),
@@ -129,55 +229,36 @@ new Vue({
         timeCasa: null,
         timeFora:null,
         visao:'tabela'
+        }
     },
-    computed:{
-        timesLibertadores(){
-            return this.times.slice(0,6);
-        },
-        timesRebaixados(){
-            return this.times.slice(16,20);
-        },
-        timesFiltrados(){
-            var times = this.timesOrdered;
-            var busca = this.busca.toLowerCase();
-            
-            return _.filter(times,function(time){
-                
-                return time.nome.toLowerCase().indexOf(busca) >= 0;
-            });
-        },
-        timesOrdered(){
-            var times = _.orderBy(this.times,this.ordem.colunas,this.ordem.orientacao);
-            return times;
-        },
-        
-        
+    computed:{ 
     },
     methods:{
-        showAlert(){
-            alert('Fim de Jogo');
-        },
-        pegarValor($event){
-            console.log($event.data);
-        },
+        
         criarNovoJogo(){
             var indiceCasa = Math.floor(Math.random()*20),
             indiceFora=Math.floor(Math.random()*20);
-            
-            this.timeCasa = this.times[indiceCasa];
-            
+            this.timeCasa = this.times[indiceCasa];            
             this.timeFora = this.times[indiceFora];
-            this.visao='placar';
+            this.showPlacar();
             
-        },
-        
-        ordenar(indice){
-            
-            this.$set(this.ordem.orientacao,indice,this.ordem.orientacao[indice]=='desc' ? 'asc':'desc')
         },
         showTabela(){
             this.visao = "tabela";
+        },
+        showPlacar(){
+            this.visao = "placar";
         }
-    },
+    }
+});
+
+Vue.filter('ucwords',(valor) => {
     
+    return valor.charAt(0).toUpperCase() + valor.slice(1);
+    
+});
+
+new Vue({
+    el: '#app',
+    template:'<my-app></my-app>'
 });

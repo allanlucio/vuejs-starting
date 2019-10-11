@@ -19,67 +19,7 @@
 </head>
 <body>
     
-    <div id="app" class="container">
-        
-        <titulo></titulo>
-        <div class="row">
-            <div class="col-md-12">
-                <button class="btn btn-primary" @click='criarNovoJogo'> Novo Jogo</button>
-            </div>
-            
-        </div>
-        
-        <div  class="row">
-            <div class="col-md-12" v-show="visao != 'tabela'">
-                
-                <novo-jogo @fim-jogo="showTabela()" :time-casa="timeCasa" :time-fora="timeFora"></novo-jogo>
-                
-            </div>
-            
-        </div>
-        
-        <div class="col-md-12" v-show="visao == 'tabela'">
-            <input type="text" class="form-control" v-model='busca'>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        
-                        <th v-for="(coluna, indice) in ordem.colunas">
-                            
-                            <a href="#" @click.prevent="ordenar(indice)">{{coluna | ucwords }}</a>
-                            
-                        </th>
-                        
-                        
-                    </tr>
-                    
-                </thead>
-                <tbody>
-                    <tr v-for='(time,indice) in timesFiltrados' :class="{'table-success': indice < 6, 'table-danger':indice > 15}" :style="{'font-size': indice<6?'17px':'15px'}">
-                        <td><clube :time='time' invertido='false'></clube></td>
-                        <td>{{time.pontos}}</td>
-                        <td>{{time.gm}}</td>
-                        <td>{{time.gs}}</td>
-                        <td>{{time.saldo}}</td>
-                    </tr>
-                    
-                    
-                </tbody>
-            </table>
-            
-            
-            <clubes-libertadores :times='timesOrdered'></clubes-libertadores>
-            <clubes-rebaixados   :times='timesOrdered'></clubes-rebaixados>
-            
-        </div>
-        
-        
-        
-        
-        
-        
-    </div>
+    <div id="app"></div>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
