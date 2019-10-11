@@ -12,8 +12,8 @@ Vue.component('clube',
     props:['time','invertido'],
     template:`
     <div style="display: flex; flex-direction:row">
-        <img :style="{order: invertido =='true'?2:1}" class="escudo" :src="time.escudo" alt="">
-        <span :style="{order: invertido =='true'?1:2}">{{time.nome | ucwords}}</span>
+    <img :style="{order: invertido =='true'?2:1}" class="escudo" :src="time.escudo" alt="">
+    <span :style="{order: invertido =='true'?1:2}">{{time.nome | ucwords}}</span>
     </div>
     `
 });
@@ -21,14 +21,14 @@ Vue.component('clubes-rebaixados',
 {
     props:['times'],
     template:`
-        <div>
-        <h3>Times Rebaixados</h3>
-        <ul>
-            <li v-for='time in timesRebaixados'>
-                <clube :time='time'></clube>
-            </li>
-        </ul>
-        </div>
+    <div>
+    <h3>Times Rebaixados</h3>
+    <ul>
+    <li v-for='time in timesRebaixados'>
+    <clube :time='time'></clube>
+    </li>
+    </ul>
+    </div>
     `,
     computed:{
         timesRebaixados(){
@@ -40,14 +40,14 @@ Vue.component('clubes-libertadores',
 {
     props:['times'],
     template:`
-        <div>
-        <h3>Times classificados para a libertadores 2019</h3>
-        <ul>
-            <li v-for='time in timesLibertadores'>
-                <clube :time='time'></clube>
-            </li>
-        </ul>
-        </div>
+    <div>
+    <h3>Times classificados para a libertadores 2019</h3>
+    <ul>
+    <li v-for='time in timesLibertadores'>
+    <clube :time='time'></clube>
+    </li>
+    </ul>
+    </div>
     `,
     computed:{
         timesLibertadores(){
@@ -56,9 +56,38 @@ Vue.component('clubes-libertadores',
     }
 });
 
+Vue.component('novo-jogo',{
+    props:['timeCasa','timeFora'],
+    data(){
+        return {
+            golsCasa:0,
+            golsFora:0
+        }
+    },
+    methods:{
+        fimJogo(){
+            var golsMarcados= parseInt(this.golsCasa)
+            var golsSofridos= parseInt(this.golsFora)
+            this.timeCasa.fimJogo(this.timeFora,golsMarcados,golsSofridos);
+            this.$emit('fim-jogo');
+        },
+    },
+    template:`
+    <form class='form-inline'>
+    <input type="text" class="form-control col-md-1" v-model="golsCasa">
+    <clube :time="timeCasa" invertido="true" v-if="timeCasa"></clube>
+    <span>X</span>
+    <clube :time="timeFora" v-if="timeFora"></clube>
+    <input type="text" class="form-control col-md-1" v-model="golsFora">
+    <button type="button" class="btn btn-primary" @click="fimJogo"> Fim de Jogo</button>
+    </form>
+    
+    `
+});
+
 Vue.filter('ucwords',(valor) => {
     
-        return valor.charAt(0).toUpperCase() + valor.slice(1);
+    return valor.charAt(0).toUpperCase() + valor.slice(1);
     
 });
 
@@ -97,16 +126,8 @@ new Vue({
             new Time('América-MG', 'assets/america_mg_60x60.png'),
             new Time('Paraná', 'assets/parana_60x60.png'),
         ],
-        novoJogo:{
-            casa: {
-                time:null,
-                gols:0
-            },
-            fora:{
-                time:null,
-                gols:0
-            }
-        },
+        timeCasa: null,
+        timeFora:null,
         visao:'tabela'
     },
     computed:{
@@ -128,7 +149,8 @@ new Vue({
         timesOrdered(){
             var times = _.orderBy(this.times,this.ordem.colunas,this.ordem.orientacao);
             return times;
-        }
+        },
+        
         
     },
     methods:{
@@ -142,32 +164,20 @@ new Vue({
             var indiceCasa = Math.floor(Math.random()*20),
             indiceFora=Math.floor(Math.random()*20);
             
-            this.novoJogo.casa.time = this.times[indiceCasa];
+            this.timeCasa = this.times[indiceCasa];
             
-            this.novoJogo.fora.time = this.times[indiceFora];
-            this.novoJogo.casa.gols=0;
-            this.novoJogo.fora.gols=0;
+            this.timeFora = this.times[indiceFora];
             this.visao='placar';
-            console.log(this.novoJogo);
-        },
-        fimJogo(){
-            var golsMarcados= parseInt(this.novoJogo.casa.gols)
-            var golsSofridos= parseInt(this.novoJogo.fora.gols)
-            var timeAdversario = this.novoJogo.fora.time;
-            var timeCasa= this.novoJogo.casa.time;
             
-            timeCasa.fimJogo(timeAdversario,golsMarcados,golsSofridos);
-            this.visao='tabela';
         },
+        
         ordenar(indice){
             
             this.$set(this.ordem.orientacao,indice,this.ordem.orientacao[indice]=='desc' ? 'asc':'desc')
+        },
+        showTabela(){
+            this.visao = "tabela";
         }
     },
-    filters:{
-        saldo(time){
-            return time.gm - time.gs;
-        },
-        
-    }
+    
 });
