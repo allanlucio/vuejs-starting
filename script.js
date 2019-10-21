@@ -11,21 +11,16 @@ Vue.component("my-app",{
     <titulo></titulo>
     <div class="row">
     <div class="col-md-12">
-    <novo-jogo :times="$root.times" @novo-jogo="showPlacar($event)"></novo-jogo>
+    <novo-jogo :times="$root.times"></novo-jogo>
     </div>
     
     </div>
     
     <div  class="row">
-    <div class="col-md-12" v-show="visao != 'tabela'">
-    
-    <placar @fim-jogo="showTabela()" :time-casa="timeCasa" :time-fora="timeFora"></placar>
-    
-    </div>
     
     </div>
     <div class="row">
-    <div class="col-md-12" v-show="visao == 'tabela'">
+    <div class="col-md-12">
     <tabela-clubes :times="$root.times"></tabela-clubes>
     
     
@@ -223,35 +218,6 @@ Vue.component('placar',{
 
 
 
-Vue.component('novo-jogo',
-{
-    inject:["timesColecao"],
-    methods:{
-        
-        criarNovoJogo(){
-            var indiceCasa = Math.floor(Math.random()*20);
-            indiceFora=Math.floor(Math.random()*20);
-            var timeCasa = this.timesColecao[indiceCasa];            
-            var timeFora = this.timesColecao[indiceFora];
-            
-            this.$emit("novo-jogo",{timeCasa,timeFora});
-            
-            
-        },
-    },
-    data(){
-        return {
-            times:this.timesColecao,
-            
-        }
-    },
-    template:`
-    <div>
-    <button class="btn btn-primary" @click='criarNovoJogo'> Novo Jogo</button>
-    </div>
-    `,
-    
-});
 
 Vue.component('clube',
 {
@@ -264,9 +230,90 @@ Vue.component('clube',
     `
 });
 
+
+Vue.component('novo-jogo',
+{
+    inject:["timesColecao"],
+    methods:{
+        
+        criarNovoJogo(){
+            var indiceCasa = Math.floor(Math.random()*20);
+            indiceFora=Math.floor(Math.random()*20);
+            this.timeCasa = this.timesColecao[indiceCasa];            
+            this.timeFora = this.timesColecao[indiceFora];
+            
+            // this.$emit("novo-jogo",{timeCasa,timeFora});
+            
+            
+        },
+    },
+    data(){
+        return {
+            times:this.timesColecao,
+            timeCasa: null,
+            timeFora: null
+            
+        }
+    },
+    template:`
+    <div>
+    <button class="btn btn-primary" @click='criarNovoJogo' data-target="#modalExemplo" data-toggle="modal"> Novo Jogo</button>
+    <placar-modal :time-casa="timeCasa" :time-fora="timeFora"></placar-modal>
+    </div>
+    `,
+    
+});
+
+Vue.component("placar-modal", {
+    props:['timeCasa','timeFora'],
+    data(){
+        return {
+            golsCasa:0,
+            golsFora:0
+        }
+    },
+    methods:{
+        fimJogo(){
+            var golsMarcados= parseInt(this.golsCasa)
+            var golsSofridos= parseInt(this.golsFora)
+            this.timeCasa.fimJogo(this.timeFora,golsMarcados,golsSofridos);
+            this.$emit('fim-jogo');
+        },
+    },
+    template: `
+    <div class="modal fade" id="modalExemplo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">Novo Jogo</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+    <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+    <div class="modal-body">
+        <form class='form-inline'>
+        <input type="text" class="form-control col-md-1" v-model="golsCasa">
+        <clube :time="timeCasa" invertido="true" v-if="timeCasa"></clube>
+        <span>X</span>
+        <clube :time="timeFora" v-if="timeFora"></clube>
+        <input type="text" class="form-control col-md-1" v-model="golsFora">
+        </form>
+    </div>
+    <div class="modal-footer">
+        
+        <button type="button" class="btn btn-primary" data-dismiss="modal" @click="fimJogo"> Fim de Jogo</button>
+    </div>
+    </div>
+    </div>
+    </div>
+    `
+});
+
+
+
 new Vue({
     el: '#app',
-    template:'<my-app></my-app>',
+    // template:'',
     provide(){
         return {
             timesColecao:[
