@@ -1,5 +1,4 @@
 Vue.filter('ucwords',(valor) => {
-    
     return valor.charAt(0).toUpperCase() + valor.slice(1);
     
 });
@@ -12,7 +11,7 @@ Vue.component("my-app",{
     <titulo></titulo>
     <div class="row">
     <div class="col-md-12">
-        <novo-jogo :times="times" @novo-jogo="showPlacar($event)"></novo-jogo>
+    <novo-jogo :times="$root.times" @novo-jogo="showPlacar($event)"></novo-jogo>
     </div>
     
     </div>
@@ -27,7 +26,7 @@ Vue.component("my-app",{
     </div>
     <div class="row">
     <div class="col-md-12" v-show="visao == 'tabela'">
-    <tabela-clubes :times="times"></tabela-clubes>
+    <tabela-clubes :times="$root.times"></tabela-clubes>
     
     
     
@@ -43,30 +42,6 @@ Vue.component("my-app",{
     `,
     data(){
         return {
-            
-            
-            times:[
-                new Time('palmeiras', 'assets/palmeiras_60x60.png'),
-                new Time('Internacional', 'assets/internacional_60x60.png'),
-                new Time('Flamengo', 'assets/flamengo_60x60.png'),
-                new Time('Atlético-MG', 'assets/atletico_mg_60x60.png'),
-                new Time('Santos', 'assets/santos_60x60.png'),
-                new Time('Botafogo', 'assets/botafogo_60x60.png'),
-                new Time('Atlético-PR', 'assets/atletico-pr_60x60.png'),
-                new Time('Corinthians', 'assets/corinthians_60x60.png'),
-                new Time('Grêmio', 'assets/gremio_60x60.png'),
-                new Time('Fluminense', 'assets/fluminense_60x60.png'),
-                new Time('Bahia', 'assets/bahia_60x60.png'),
-                new Time('Chapecoense', 'assets/chapecoense_60x60.png'),
-                new Time('São Paulo', 'assets/sao_paulo_60x60.png'),
-                new Time('Cruzeiro', 'assets/cruzeiro_60x60.png'),
-                new Time('Sport', 'assets/sport_60x60.png'),
-                new Time('Ceará', 'assets/ceara_60x60.png'),
-                new Time('Vitória', 'assets/vitoria_60x60.png'),
-                new Time('Vasco', 'assets/vasco_60x60.png'),
-                new Time('América-MG', 'assets/america_mg_60x60.png'),
-                new Time('Paraná', 'assets/parana_60x60.png'),
-            ],
             visao:'tabela',
             timeCasa: null,
             timeFora:null
@@ -92,85 +67,22 @@ Vue.component('titulo',
 {
     template:`
     <div class="row">
-    <h1>Campeonato Brasileiro Serie A - 2018</h1>
-    </div>
-    `
-});
-
-Vue.component('clubes-rebaixados',
-{
-    props:['times'],
-    template:`
-    <div>
-    <h3>Times Rebaixados</h3>
-    <ul>
-    <li v-for='time in timesRebaixados'>
-    <clube :time='time'></clube>
-    </li>
-    </ul>
+    <h1 @click="clique()">Campeonato Brasileiro Serie A - 2018 {{$parent.visao}}</h1>
     </div>
     `,
-    computed:{
-        timesRebaixados(){
-            return this.times.slice(16,20);
-        },
-    }
-});
-Vue.component('clubes-libertadores',
-{
-    props:['times'],
-    template:`
-    <div>
-    <h3>Times classificados para a libertadores 2019</h3>
-    <ul>
-    <li v-for='time in timesLibertadores'>
-    <clube :time='time'></clube>
-    </li>
-    </ul>
-    </div>
-    `,
-    computed:{
-        timesLibertadores(){
-            return this.times.slice(0,6);
-        },
-    }
-});
-
-Vue.component('placar',{
-    props:['timeCasa','timeFora'],
-    data(){
-        return {
-            golsCasa:0,
-            golsFora:0
-        }
-    },
     methods:{
-        fimJogo(){
-            var golsMarcados= parseInt(this.golsCasa)
-            var golsSofridos= parseInt(this.golsFora)
-            this.timeCasa.fimJogo(this.timeFora,golsMarcados,golsSofridos);
-            this.$emit('fim-jogo');
-        },
-    },
-    template:`
-    <form class='form-inline'>
-    <input type="text" class="form-control col-md-1" v-model="golsCasa">
-    <clube :time="timeCasa" invertido="true" v-if="timeCasa"></clube>
-    <span>X</span>
-    <clube :time="timeFora" v-if="timeFora"></clube>
-    <input type="text" class="form-control col-md-1" v-model="golsFora">
-    <button type="button" class="btn btn-primary col-md-12" @click="fimJogo"> Fim de Jogo</button>
-    </form>
-    
-    `
+        clique(){
+            console.log(this.$parent.$parent);
+        }
+    }
 });
-
 Vue.component('tabela-clubes',{
-    props:['times'],
     
+    inject:["timesColecao"],
     data(){
         
         return {
+            times:this.timesColecao,
             busca:'',
             ordem:{
                 colunas: [
@@ -241,32 +153,102 @@ Vue.component('tabela-clubes',{
     `
 });
 
+Vue.component('clubes-rebaixados',
+{
+    props:["times"],
+    template:`
+    <div>
+    <h3>Times Rebaixados</h3>
+    <ul>
+    <li v-for='time in timesRebaixados'>
+    <clube :time='time'></clube>
+    </li>
+    </ul>
+    </div>
+    `,
+    computed:{
+        timesRebaixados(){
+            return this.times.slice(16,20);
+        },
+    }
+});
+Vue.component('clubes-libertadores',
+{
+    props:["times"],
+    template:`
+    <div>
+    <h3>Times classificados para a libertadores 2019</h3>
+    <ul>
+    <li v-for='time in timesLibertadores'>
+    <clube :time='time'></clube>
+    </li>
+    </ul>
+    </div>
+    `,
+    computed:{
+        timesLibertadores(){
+            return this.times.slice(0,6);
+        },
+    }
+});
+
+Vue.component('placar',{
+    props:['timeCasa','timeFora'],
+    data(){
+        return {
+            golsCasa:0,
+            golsFora:0
+        }
+    },
+    methods:{
+        fimJogo(){
+            var golsMarcados= parseInt(this.golsCasa)
+            var golsSofridos= parseInt(this.golsFora)
+            this.timeCasa.fimJogo(this.timeFora,golsMarcados,golsSofridos);
+            this.$emit('fim-jogo');
+        },
+    },
+    template:`
+    <form class='form-inline'>
+    <input type="text" class="form-control col-md-1" v-model="golsCasa">
+    <clube :time="timeCasa" invertido="true" v-if="timeCasa"></clube>
+    <span>X</span>
+    <clube :time="timeFora" v-if="timeFora"></clube>
+    <input type="text" class="form-control col-md-1" v-model="golsFora">
+    <button type="button" class="btn btn-primary col-md-12" @click="fimJogo"> Fim de Jogo</button>
+    </form>
+    
+    `
+});
+
+
+
 Vue.component('novo-jogo',
 {
+    inject:["timesColecao"],
     methods:{
         
         criarNovoJogo(){
             var indiceCasa = Math.floor(Math.random()*20);
             indiceFora=Math.floor(Math.random()*20);
-            var timeCasa = this.times[indiceCasa];            
-            var timeFora = this.times[indiceFora];
+            var timeCasa = this.timesColecao[indiceCasa];            
+            var timeFora = this.timesColecao[indiceFora];
             
             this.$emit("novo-jogo",{timeCasa,timeFora});
             
             
         },
     },
-    props:["times"],
-    // data(){
-    //     return {
-    //         timeCasa:null,
-    //         timeFora:null
-    //     }
-    // },
+    data(){
+        return {
+            times:this.timesColecao,
+            
+        }
+    },
     template:`
-        <div>
-            <button class="btn btn-primary" @click='criarNovoJogo'> Novo Jogo</button>
-        </div>
+    <div>
+    <button class="btn btn-primary" @click='criarNovoJogo'> Novo Jogo</button>
+    </div>
     `,
     
 });
@@ -284,5 +266,56 @@ Vue.component('clube',
 
 new Vue({
     el: '#app',
-    template:'<my-app></my-app>'
+    template:'<my-app></my-app>',
+    provide(){
+        return {
+            timesColecao:[
+                new Time('palmeiras', 'assets/palmeiras_60x60.png'),
+                new Time('Internacional', 'assets/internacional_60x60.png'),
+                new Time('Flamengo', 'assets/flamengo_60x60.png'),
+                new Time('Atlético-MG', 'assets/atletico_mg_60x60.png'),
+                new Time('Santos', 'assets/santos_60x60.png'),
+                new Time('Botafogo', 'assets/botafogo_60x60.png'),
+                new Time('Atlético-PR', 'assets/atletico-pr_60x60.png'),
+                new Time('Corinthians', 'assets/corinthians_60x60.png'),
+                new Time('Grêmio', 'assets/gremio_60x60.png'),
+                new Time('Fluminense', 'assets/fluminense_60x60.png'),
+                new Time('Bahia', 'assets/bahia_60x60.png'),
+                new Time('Chapecoense', 'assets/chapecoense_60x60.png'),
+                new Time('São Paulo', 'assets/sao_paulo_60x60.png'),
+                new Time('Cruzeiro', 'assets/cruzeiro_60x60.png'),
+                new Time('Sport', 'assets/sport_60x60.png'),
+                new Time('Ceará', 'assets/ceara_60x60.png'),
+                new Time('Vitória', 'assets/vitoria_60x60.png'),
+                new Time('Vasco', 'assets/vasco_60x60.png'),
+                new Time('América-MG', 'assets/america_mg_60x60.png'),
+                new Time('Paraná', 'assets/parana_60x60.png'),
+            ]
+        }
+    },
+    data: {
+        param1:"Hello World Root",
+        // times:[
+        //         new Time('palmeiras', 'assets/palmeiras_60x60.png'),
+        //         new Time('Internacional', 'assets/internacional_60x60.png'),
+        //         new Time('Flamengo', 'assets/flamengo_60x60.png'),
+        //         new Time('Atlético-MG', 'assets/atletico_mg_60x60.png'),
+        //         new Time('Santos', 'assets/santos_60x60.png'),
+        //         new Time('Botafogo', 'assets/botafogo_60x60.png'),
+        //         new Time('Atlético-PR', 'assets/atletico-pr_60x60.png'),
+        //         new Time('Corinthians', 'assets/corinthians_60x60.png'),
+        //         new Time('Grêmio', 'assets/gremio_60x60.png'),
+        //         new Time('Fluminense', 'assets/fluminense_60x60.png'),
+        //         new Time('Bahia', 'assets/bahia_60x60.png'),
+        //         new Time('Chapecoense', 'assets/chapecoense_60x60.png'),
+        //         new Time('São Paulo', 'assets/sao_paulo_60x60.png'),
+        //         new Time('Cruzeiro', 'assets/cruzeiro_60x60.png'),
+        //         new Time('Sport', 'assets/sport_60x60.png'),
+        //         new Time('Ceará', 'assets/ceara_60x60.png'),
+        //         new Time('Vitória', 'assets/vitoria_60x60.png'),
+        //         new Time('Vasco', 'assets/vasco_60x60.png'),
+        //         new Time('América-MG', 'assets/america_mg_60x60.png'),
+        //         new Time('Paraná', 'assets/parana_60x60.png'),
+        //     ],
+    }
 });
