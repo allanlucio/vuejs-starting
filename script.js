@@ -1,3 +1,93 @@
+Vue.filter('ucwords',(valor) => {
+    
+    return valor.charAt(0).toUpperCase() + valor.slice(1);
+    
+});
+
+Vue.component("my-app",{
+    
+    template:`
+    <div id="app" class="container">
+    
+    <titulo></titulo>
+    <div class="row">
+    <div class="col-md-12">
+        <novo-jogo :times="times" @novo-jogo="showPlacar($event)"></novo-jogo>
+    </div>
+    
+    </div>
+    
+    <div  class="row">
+    <div class="col-md-12" v-show="visao != 'tabela'">
+    
+    <placar @fim-jogo="showTabela()" :time-casa="timeCasa" :time-fora="timeFora"></placar>
+    
+    </div>
+    
+    </div>
+    <div class="row">
+    <div class="col-md-12" v-show="visao == 'tabela'">
+    <tabela-clubes :times="times"></tabela-clubes>
+    
+    
+    
+    
+    </div>
+    </div>
+    
+    
+    
+    
+    
+    </div>
+    `,
+    data(){
+        return {
+            
+            
+            times:[
+                new Time('palmeiras', 'assets/palmeiras_60x60.png'),
+                new Time('Internacional', 'assets/internacional_60x60.png'),
+                new Time('Flamengo', 'assets/flamengo_60x60.png'),
+                new Time('Atlético-MG', 'assets/atletico_mg_60x60.png'),
+                new Time('Santos', 'assets/santos_60x60.png'),
+                new Time('Botafogo', 'assets/botafogo_60x60.png'),
+                new Time('Atlético-PR', 'assets/atletico-pr_60x60.png'),
+                new Time('Corinthians', 'assets/corinthians_60x60.png'),
+                new Time('Grêmio', 'assets/gremio_60x60.png'),
+                new Time('Fluminense', 'assets/fluminense_60x60.png'),
+                new Time('Bahia', 'assets/bahia_60x60.png'),
+                new Time('Chapecoense', 'assets/chapecoense_60x60.png'),
+                new Time('São Paulo', 'assets/sao_paulo_60x60.png'),
+                new Time('Cruzeiro', 'assets/cruzeiro_60x60.png'),
+                new Time('Sport', 'assets/sport_60x60.png'),
+                new Time('Ceará', 'assets/ceara_60x60.png'),
+                new Time('Vitória', 'assets/vitoria_60x60.png'),
+                new Time('Vasco', 'assets/vasco_60x60.png'),
+                new Time('América-MG', 'assets/america_mg_60x60.png'),
+                new Time('Paraná', 'assets/parana_60x60.png'),
+            ],
+            visao:'tabela',
+            timeCasa: null,
+            timeFora:null
+        }
+    },
+    computed:{ 
+    },
+    methods:{
+        showTabela(){
+            this.visao = "tabela";
+        },
+        showPlacar({timeCasa,timeFora}){
+            
+            this.visao = "placar";
+            this.timeCasa = timeCasa;
+            this.timeFora = timeFora;
+            console.log("oi");
+        }
+    }
+});
+
 Vue.component('titulo',
 {
     template:`
@@ -7,16 +97,6 @@ Vue.component('titulo',
     `
 });
 
-Vue.component('clube',
-{
-    props:['time','invertido'],
-    template:`
-    <div style="display: flex; flex-direction:row">
-    <img :style="{order: invertido =='true'?2:1}" class="escudo" :src="time.escudo" alt="">
-    <span :style="{order: invertido =='true'?1:2}">{{time.nome | ucwords}}</span>
-    </div>
-    `
-});
 Vue.component('clubes-rebaixados',
 {
     props:['times'],
@@ -56,7 +136,7 @@ Vue.component('clubes-libertadores',
     }
 });
 
-Vue.component('novo-jogo',{
+Vue.component('placar',{
     props:['timeCasa','timeFora'],
     data(){
         return {
@@ -102,7 +182,7 @@ Vue.component('tabela-clubes',{
             },
             
         }
-    
+        
     },
     methods:{
         ordenar(indice){
@@ -128,134 +208,78 @@ Vue.component('tabela-clubes',{
     template:`
     <div>
     <input type="text" class="form-control" v-model='busca'>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    
-                    <th v-for="(coluna, indice) in ordem.colunas">
-                        
-                        <a href="#" @click.prevent="ordenar(indice)">{{coluna | ucwords }}</a>
-                        
-                    </th>
-                    
-                    
-                </tr>
-                
-            </thead>
-            <tbody>
-                <tr v-for='(time,indice) in timesFiltrados' :class="{'table-success': indice < 6, 'table-danger':indice > 15}" :style="{'font-size': indice<6?'17px':'15px'}">
-                    <td><clube :time='time' invertido='false'></clube></td>
-                    <td>{{time.pontos}}</td>
-                    <td>{{time.gm}}</td>
-                    <td>{{time.gs}}</td>
-                    <td>{{time.saldo}}</td>
-                </tr>
-                
-                
-            </tbody>
-        </table>
-        <clubes-libertadores :times='timesOrdered'></clubes-libertadores>
-        <clubes-rebaixados   :times='timesOrdered'></clubes-rebaixados>
-        </div>
+    <table class="table table-striped">
+    <thead>
+    <tr>
+    <th>Nome</th>
+    
+    <th v-for="(coluna, indice) in ordem.colunas">
+    
+    <a href="#" @click.prevent="ordenar(indice)">{{coluna | ucwords }}</a>
+    
+    </th>
+    
+    
+    </tr>
+    
+    </thead>
+    <tbody>
+    <tr v-for='(time,indice) in timesFiltrados' :class="{'table-success': indice < 6, 'table-danger':indice > 15}" :style="{'font-size': indice<6?'17px':'15px'}">
+    <td><clube :time='time' invertido='false'></clube></td>
+    <td>{{time.pontos}}</td>
+    <td>{{time.gm}}</td>
+    <td>{{time.gs}}</td>
+    <td>{{time.saldo}}</td>
+    </tr>
+    
+    
+    </tbody>
+    </table>
+    <clubes-libertadores :times='timesOrdered'></clubes-libertadores>
+    <clubes-rebaixados   :times='timesOrdered'></clubes-rebaixados>
+    </div>
     `
 });
 
-
-
-Vue.component("my-app",{
-    
-    template:`
-    <div id="app" class="container">
-        
-    <titulo></titulo>
-    <div class="row">
-        <div class="col-md-12">
-            <button class="btn btn-primary" @click='criarNovoJogo'> Novo Jogo</button>
-        </div>
-        
-    </div>
-    
-    <div  class="row">
-        <div class="col-md-12" v-show="visao != 'tabela'">
-            
-            <novo-jogo @fim-jogo="showTabela()" :time-casa="timeCasa" :time-fora="timeFora"></novo-jogo>
-            
-        </div>
-        
-    </div>
-    <div class="row">
-    <div class="col-md-12" v-show="visao == 'tabela'">
-        <tabela-clubes :times="times"></tabela-clubes>
-        
-        
-        
-        
-    </div>
-</div>
-    
-    
-    
-    
-    
-</div>
-    `,
-    data(){
-        return {
-            
-        
-        times:[
-            new Time('palmeiras', 'assets/palmeiras_60x60.png'),
-            new Time('Internacional', 'assets/internacional_60x60.png'),
-            new Time('Flamengo', 'assets/flamengo_60x60.png'),
-            new Time('Atlético-MG', 'assets/atletico_mg_60x60.png'),
-            new Time('Santos', 'assets/santos_60x60.png'),
-            new Time('Botafogo', 'assets/botafogo_60x60.png'),
-            new Time('Atlético-PR', 'assets/atletico-pr_60x60.png'),
-            new Time('Corinthians', 'assets/corinthians_60x60.png'),
-            new Time('Grêmio', 'assets/gremio_60x60.png'),
-            new Time('Fluminense', 'assets/fluminense_60x60.png'),
-            new Time('Bahia', 'assets/bahia_60x60.png'),
-            new Time('Chapecoense', 'assets/chapecoense_60x60.png'),
-            new Time('São Paulo', 'assets/sao_paulo_60x60.png'),
-            new Time('Cruzeiro', 'assets/cruzeiro_60x60.png'),
-            new Time('Sport', 'assets/sport_60x60.png'),
-            new Time('Ceará', 'assets/ceara_60x60.png'),
-            new Time('Vitória', 'assets/vitoria_60x60.png'),
-            new Time('Vasco', 'assets/vasco_60x60.png'),
-            new Time('América-MG', 'assets/america_mg_60x60.png'),
-            new Time('Paraná', 'assets/parana_60x60.png'),
-        ],
-        timeCasa: null,
-        timeFora:null,
-        visao:'tabela'
-        }
-    },
-    computed:{ 
-    },
+Vue.component('novo-jogo',
+{
     methods:{
         
         criarNovoJogo(){
-            var indiceCasa = Math.floor(Math.random()*20),
+            var indiceCasa = Math.floor(Math.random()*20);
             indiceFora=Math.floor(Math.random()*20);
-            this.timeCasa = this.times[indiceCasa];            
-            this.timeFora = this.times[indiceFora];
-            this.showPlacar();
+            var timeCasa = this.times[indiceCasa];            
+            var timeFora = this.times[indiceFora];
+            
+            this.$emit("novo-jogo",{timeCasa,timeFora});
+            
             
         },
-        showTabela(){
-            this.visao = "tabela";
-        },
-        showPlacar(){
-            this.visao = "placar";
-        }
-    }
+    },
+    props:["times"],
+    // data(){
+    //     return {
+    //         timeCasa:null,
+    //         timeFora:null
+    //     }
+    // },
+    template:`
+        <div>
+            <button class="btn btn-primary" @click='criarNovoJogo'> Novo Jogo</button>
+        </div>
+    `,
+    
 });
 
-Vue.filter('ucwords',(valor) => {
-    
-    return valor.charAt(0).toUpperCase() + valor.slice(1);
-    
+Vue.component('clube',
+{
+    props:['time','invertido'],
+    template:`
+    <div style="display: flex; flex-direction:row">
+    <img :style="{order: invertido =='true'?2:1}" class="escudo" :src="time.escudo" alt="">
+    <span :style="{order: invertido =='true'?1:2}">{{time.nome | ucwords}}</span>
+    </div>
+    `
 });
 
 new Vue({
