@@ -243,7 +243,7 @@ Vue.component('novo-jogo',
             this.timeFora = this.timesColecao[indiceFora];
             
             // this.$emit("novo-jogo",{timeCasa,timeFora});
-            this.$refs.modal.show();
+            this.$refs.modal.showModal();
             
             
         },
@@ -274,43 +274,77 @@ Vue.component("placar-modal", {
         }
     },
     methods:{
-        show(){
-            $("#modalExemplo").modal("show");
+        showModal(){
+            this.getModal().show();
         },
-        close(){
-            $("#modalExemplo").modal("hide");
+        closeModal(){
+            this.getModal().close();
+        },
+        getModal(){
+            return this.$refs.modal;
         },
         fimJogo(){
             var golsMarcados= parseInt(this.golsCasa)
             var golsSofridos= parseInt(this.golsFora)
             this.timeCasa.fimJogo(this.timeFora,golsMarcados,golsSofridos);
-            this.close();
+            this.closeModal();
             
         },
     },
-    template: `
-    <div class="modal fade" id="modalExemplo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-    <div class="modal-content">
-    <div class="modal-header">
-    <h5 class="modal-title" id="exampleModalLabel">Novo Jogo</h5>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-    <span aria-hidden="true">&times;</span>
-    </button>
-    </div>
-    <div class="modal-body">
-        <form class='form-inline'>
+    template: `<modal ref="modal">
+    
+    <h5 class="modal-title" slot="header" id="exampleModalLabel">Novo Jogo</h5>
+    
+    
+    
+    <form slot="body" class='form-inline'>
         <input type="text" class="form-control col-md-1" v-model="golsCasa">
         <clube :time="timeCasa" invertido="true" v-if="timeCasa"></clube>
         <span>X</span>
         <clube :time="timeFora" v-if="timeFora"></clube>
         <input type="text" class="form-control col-md-1" v-model="golsFora">
-        </form>
-    </div>
-    <div class="modal-footer">
-        
+    </form>
+    
+    
+    
+    <div slot="footer">
         <button type="button" class="btn btn-primary" @click="fimJogo"> Fim de Jogo</button>
     </div>
+    
+    
+    </modal>
+    `
+});
+Vue.component("modal", {
+    methods:{
+        show(){
+            $(this.$el).modal("show");
+        },
+        close(){
+            $(this.$el).modal("hide");
+        },
+        
+    },
+    template: `
+    <div class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        
+        <div class="modal-header">
+            <slot name="header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </slot>
+            
+        </div>
+        <div class="modal-body">
+            <slot name="body"></slot>
+        </div>
+        <div class="modal-footer">
+            
+            <slot name="footer"></slot>
+        </div>
     </div>
     </div>
     </div>
