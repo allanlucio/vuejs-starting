@@ -243,6 +243,7 @@ Vue.component('novo-jogo',
             this.timeFora = this.timesColecao[indiceFora];
             
             // this.$emit("novo-jogo",{timeCasa,timeFora});
+            this.$refs.modal.show();
             
             
         },
@@ -257,8 +258,8 @@ Vue.component('novo-jogo',
     },
     template:`
     <div>
-    <button class="btn btn-primary" @click='criarNovoJogo' data-target="#modalExemplo" data-toggle="modal"> Novo Jogo</button>
-    <placar-modal :time-casa="timeCasa" :time-fora="timeFora"></placar-modal>
+    <button class="btn btn-primary" @click='criarNovoJogo'> Novo Jogo</button>
+    <placar-modal :time-casa="timeCasa" :time-fora="timeFora" ref="modal"></placar-modal>
     </div>
     `,
     
@@ -273,11 +274,18 @@ Vue.component("placar-modal", {
         }
     },
     methods:{
+        show(){
+            $("#modalExemplo").modal("show");
+        },
+        close(){
+            $("#modalExemplo").modal("hide");
+        },
         fimJogo(){
             var golsMarcados= parseInt(this.golsCasa)
             var golsSofridos= parseInt(this.golsFora)
             this.timeCasa.fimJogo(this.timeFora,golsMarcados,golsSofridos);
-            this.$emit('fim-jogo');
+            this.close();
+            
         },
     },
     template: `
@@ -301,7 +309,7 @@ Vue.component("placar-modal", {
     </div>
     <div class="modal-footer">
         
-        <button type="button" class="btn btn-primary" data-dismiss="modal" @click="fimJogo"> Fim de Jogo</button>
+        <button type="button" class="btn btn-primary" @click="fimJogo"> Fim de Jogo</button>
     </div>
     </div>
     </div>
